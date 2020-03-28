@@ -1,0 +1,17 @@
+# pull out the columns from the beagle genotype likelihood file that have the site information (chr, pos, major, minor)
+zcat GL_file.beagle.gz | tail -n +2 | awk '{print $1 "\t" $2 "\t" $3 "\t" $4}' > file_name.var.sites 
+# thin to every 1 in 200 snps (I used 250th, probably anything 100-500th snp is ok)
+cat file_name.var.sites | awk -v N=200 'NR % N == 0' > lower_LD_file_name.var.sites
+
+# index thinned sites and all sites files
+angsd sites index lower_LD_file_name.var.sites angsd sites index file_name.var.sites
+
+# get new GL file for set of individuals at just those thinned sites:
+angsd -GL 1 -doMajorMinor 3 -underFlowProtect 1 -remove_bads 1 -minMapQ 25 -minQ 20 
+-sites lower_LD_file_name.var.sites 
+-bams list_of_bams.txt
+# -doMajorMinor 3: takes major & minor allele from sites file
+# remove_bads 1: removes ‘bad’ reads, e.g. marked as duplicates
+
+# possibly best to rerun ngsadmix for all individuals, K=3,4 & all individuals except costa rica K = 3,4 and save these results at least for supplement/review. 
+# Currently reporting separate ngsadmix runs for each location. If you don’t want to rerun genotype likelihood file creation in angsd a bunch of times, you could use awk to stick different columns together (just tricky because each individual has 3 cols)
