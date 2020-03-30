@@ -4,7 +4,8 @@ zcat GL_file.beagle.gz | tail -n +2 | awk '{print $1 "\t" $2 "\t" $3 "\t" $4}' >
 cat file_name.var.sites | awk -v N=200 'NR % N == 0' > lower_LD_file_name.var.sites
 
 # index thinned sites and all sites files
-angsd sites index lower_LD_file_name.var.sites angsd sites index file_name.var.sites
+angsd sites index lower_LD_file_name.var.sites
+angsd sites index file_name.var.sites
 
 # get new GL file for set of individuals at just those thinned sites:
 angsd -GL 1 -doMajorMinor 3 -underFlowProtect 1 -remove_bads 1 -minMapQ 25 -minQ 20 
