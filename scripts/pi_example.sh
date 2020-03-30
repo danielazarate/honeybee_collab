@@ -2,15 +2,11 @@
 
 # this script calculates pi for a population and list of bams
 
-
-# to run: ./pi_within_ancestry.sh AR01 AA thin1kb_common3/byPop/output_byPop_CMA_ne670000_scaffolds_Amel4.5_noBoot ../bee_samples_listed/byPop/AR01.list
+# to run: ./pi_within_ancestry.sh AR01 R01.bams
 
 POP="${1}"
-ANCESTRY="${2}"
-ANCESTRY_HMM_PREFIX="${3}"
-BEE_ID_FILE="${4}"
-DIR_BAMS=results/"${ANCESTRY_HMM_PREFIX}"/"${ANCESTRY}"/bams
-DIR_OUT=results/"$ANCESTRY_HMM_PREFIX"/"$ANCESTRY"/pi
+BAM_LIST="${2}"
+DIR_OUT="results/pi"
 BAM_LIST="$DIR_OUT"/"$POP".bams
 
 # general bash script settings to make sure if any errors in the pipeline fail
@@ -21,20 +17,16 @@ set –o nounset
 
 REF="../data/honeybee_genome/Amel_4.5_scaffolds.fa"
 
-echo Calculating pi for POP: "$POP" and ancestry "$ANCESTRY"
+echo Calculating pi for POP: "$POP"
 
 # make directory to store output (if doesn't yet exist)
 mkdir -p "$DIR_OUT"
-
-# make list of bams to include
-for i in $(cat "$BEE_ID_FILE")
-	do echo $DIR_BAMS/$i.sort.dedup.baq.bam
-done > $BAM_LIST
 
 echo "finding site allele frequencies"
 # steps:
 # (0) Start with filtered BAM files and reference genome
 # (1) Use all sites to estimate site allele frequency
+# based on this FAQ, we don't do folding at this stage yet: https://github.com/ANGSD/angsd/issues/259
 angsd -out "$DIR_OUT/$POP" \
 -anc "$REF" \
 -fold 0 \
@@ -43,16 +35,19 @@ angsd -out "$DIR_OUT/$POP" \
 -remove_bads 1 -minMapQ 30 -minQ 20 \
 -GL 1 \
 -doSaf 1 \
--P 2
+-P 2 # cores
 
 echo "done with SAF! calculating SFS"
-realSFS "$DIR_OUT/$POP.saf.idx" -P 2 > "$DIR_OUT/$POP.sfs"
+# try folding here?
+realSFS "$DIR_OUT/$POP.saf.idx" -P 2 -fold 1 > "$DIR_OUT/$POP.sfs"
 
 echo "done with SFS! calculating within-pop diversity 'thetas'"
+# try folding here?
 angsd -out "$DIR_OUT/$POP" \
 -anc "$REF" \
 -doThetas 1 \
 -doSaf 1 \
+-fold 1 \
 -pest "$DIR_OUT/$POP.sfs" \
 -underFlowProtect 1 \
 -bam "$BAM_LIST" \
@@ -60,9 +55,10 @@ angsd -out "$DIR_OUT/$POP" \
 -GL 1 \
 -P 2
 
-echo "summarizing thetas for region and windows"
+echo "summarizing thetas for region and windows" # could also calculate pi directly from sfs
 thetaStat do_stat "$DIR_OUT"/"$POP".thetas.idx -outnames "$DIR_OUT"/"$POP".thetasAll
-thetaStat do_stat "$DIR_OUT"/"$POP".thetas.idx -win 5000 -step 1000 -outnames "$DIR_OUT"/"$POP".thetasWindows
+# ignore windows for now
+#thetaStat do_stat "$DIR_OUT"/"$POP".thetas.idx -win 5000 -step 1000 -outnames "$DIR_OUT"/"$POP".thetasWindows
 
 
 # options
