@@ -1,5 +1,5 @@
-# pull out the columns from the beagle genotype likelihood file that have the site information (chr, pos, major, minor)
-zcat GL_file.beagle.gz | tail -n +2 | awk '{print $1 "\t" $2 "\t" $3 "\t" $4}' > file_name.var.sites 
+# pull out the columns from the minor allele freq file that have the site information (chr, pos, major, minor)
+zcat GL_file.mafs.gz | tail -n +2 | awk '{print $1 "\t" $2 "\t" $3 "\t" $4}' > file_name.var.sites 
 # thin to every 1 in 200 snps (I used 250th, probably anything 100-500th snp is ok)
 cat file_name.var.sites | awk -v N=200 'NR % N == 0' > lower_LD_file_name.var.sites
 
