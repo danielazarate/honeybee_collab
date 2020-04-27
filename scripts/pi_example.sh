@@ -1,13 +1,12 @@
-#!/bin/bash -l
-
+#!/bin/bash
 # this script calculates pi for a population and list of bams
+## test change
 
 # to run: ./pi_within_ancestry.sh AR01 R01.bams
 
 POP="${1}"
 BAM_LIST="${2}"
 DIR_OUT="results/pi"
-BAM_LIST="$DIR_OUT"/"$POP".bams
 
 # general bash script settings to make sure if any errors in the pipeline fail
 # then it’s a ‘fail’ and it passes all errors to exit and allows no unset variables
@@ -15,7 +14,7 @@ set –o pipefail
 set –o errexit
 set –o nounset
 
-REF="../data/honeybee_genome/Amel_4.5_scaffolds.fa"
+REF="/media/data/dazarate/European_genome_scaffolds/Amel_4.5_scaffolds.fa"
 
 echo Calculating pi for POP: "$POP"
 
@@ -28,22 +27,22 @@ echo "finding site allele frequencies"
 # (1) Use all sites to estimate site allele frequency
 # based on this FAQ, we don't do folding at this stage yet: https://github.com/ANGSD/angsd/issues/259
 angsd -out "$DIR_OUT/$POP" \
+-r Group1.1:1000000-1100000 \
 -anc "$REF" \
 -fold 0 \
--underFlowProtect 1 \
 -bam "$BAM_LIST" \
--remove_bads 1 -minMapQ 30 -minQ 20 \
 -GL 1 \
 -doSaf 1 \
 -P 2 # cores
 
 echo "done with SAF! calculating SFS"
-# try folding here? supply reference genome as 'anc' to polarize by the reference allele
+# try folding here? ### supply reference genome as "anc" to polarize by reference allele 
 realSFS "$DIR_OUT/$POP.saf.idx" -P 2 -fold 1 -anc "$REF" > "$DIR_OUT/$POP.sfs"
 
 echo "done with SFS! calculating within-pop diversity 'thetas'"
 # try folding here?
 angsd -out "$DIR_OUT/$POP" \
+-r Group1.1:1000000-1100000 \
 -anc "$REF" \
 -doThetas 1 \
 -doSaf 1 \
