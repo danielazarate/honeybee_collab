@@ -36,13 +36,13 @@ angsd -out "$DIR_OUT/$POP" \
 -P 2 # cores
 
 echo "done with SAF! calculating SFS"
-# try folding here? ### supply reference genome as "anc" to polarize by reference allele 
+# try folding here? ### supply reference genome as "anc" to polarize by reference allele
 realSFS "$DIR_OUT/$POP.saf.idx" -P 2 -fold 1 -anc "$REF" > "$DIR_OUT/$POP.sfs"
 
 echo "done with SFS! calculating within-pop diversity 'thetas'"
 # try folding here?
 angsd -out "$DIR_OUT/$POP" \
--r Group1.1:1000000-1100000 \
+-r Group1.1 \
 -anc "$REF" \
 -doThetas 1 \
 -doSaf 1 \
