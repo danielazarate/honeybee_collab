@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 # this script calculates pi for a population and list of bams
 
 # to run: ./pi_within_ancestry.sh AR01 R01.bams
@@ -25,29 +25,26 @@ echo "finding site allele frequencies"
 # (0) Start with filtered BAM files and reference genome
 # (1) Use all sites to estimate site allele frequency
 # based on this FAQ, we don't do folding at this stage yet: https://github.com/ANGSD/angsd/issues/259
-singularity run ~dazarate/scripts/angsd.v930.simg \
--out "$DIR_OUT/$POP" \
-angsd -out "$DIR_OUT/$POP" \
+singularity run ~dazarate/scripts/angsd.v930.simg -out "$DIR_OUT/$POP" \
 -r Group1.1 \
 -anc "$REF" \
 -remove_bads 1 \
--minMapQ 30
+-minMapQ 30 \
 -minQ 20 \
 -fold 0 \
 -bam "$BAM_LIST" \
 -GL 1 \
 -doSaf 1 \
+-underFlowProtect 1 \
 -P 2 # cores
 
 echo "done with SAF! calculating SFS"
 # try folding here? ### supply reference genome as "anc" to polarize by reference allele 
 singularity exec angsd.v930.simg /opt/angsd/angsd/misc/realSFS "$DIR_OUT/$POP.saf.idx" -P 2 -fold 1 > "$DIR_OUT/$POP.folded.sfs"
-# try folding here? ### supply reference genome as "anc" to polarize by reference allele
-realSFS "$DIR_OUT/$POP.saf.idx" -P 2 -fold 1 -anc "$REF" > "$DIR_OUT/$POP.sfs"
 
 echo "done with SFS! calculating within-pop diversity 'thetas'"
 # try folding here?
-singularity exec angsd.v930.simg /opt/angsd/angsd/misc/realSFS  saf2theta "$DIR_OUT/$POP.saf.idx" -fold 1 -outname "DIR_OUT/$POP.thetas.idx"  -sfs "$DIR_OUT/$POP.folded.sfs" 
+singularity exec angsd.v930.simg /opt/angsd/angsd/misc/realSFS  saf2theta "$DIR_OUT/$POP.saf.idx" -fold 1 -outname "$DIR_OUT/$POP.thetas.idx"  -sfs "$DIR_OUT/$POP.folded.sfs"
 
 echo "summarizing thetas for region and windows" # could also calculate pi directly from sfs
 singularity exec angsd.v930.simg /opt/angsd/angsd/misc/thetaStat do_stat "$DIR_OUT/$POP.thetas.idx" -outnames "$DIR_OUT/$POP.thetasAll"
