@@ -44,7 +44,7 @@ singularity exec angsd.v930.simg /opt/angsd/angsd/misc/realSFS "$DIR_OUT/$POP.sa
 
 echo "done with SFS! calculating within-pop diversity 'thetas'"
 # try folding here?
-singularity exec angsd.v930.simg /opt/angsd/angsd/misc/realSFS  saf2theta "$DIR_OUT/$POP.saf.idx" -fold 1 -outname "$DIR_OUT/$POP.thetas.idx"  -sfs "$DIR_OUT/$POP.folded.sfs"
+singularity exec angsd.v930.simg /opt/angsd/angsd/misc/realSFS  saf2theta "$DIR_OUT/$POP.saf.idx" -fold 1 -outname "$DIR_OUT/$POP"  -sfs "$DIR_OUT/$POP.folded.sfs" 
 
 echo "summarizing thetas for region and windows" # could also calculate pi directly from sfs
 singularity exec angsd.v930.simg /opt/angsd/angsd/misc/thetaStat do_stat "$DIR_OUT/$POP.thetas.idx" -outnames "$DIR_OUT/$POP.thetasAll"
