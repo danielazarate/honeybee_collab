@@ -34,8 +34,7 @@ samtools mpileup -g -f my.fasta my-sorted1.bam my-sorted-2.bam my-sorted-n.bam >
 bcftools view -bvcg my-raw.bcf > my-var.bcf
 
 # Filter SNPs
-bcftools view my.var.bcf |
-vcfutils.pl varFilter - > my.var-final.vcf
+bcftools view my.var.bcf | vcfutils.pl varFilter - > my.var-final.vcf
 
 # Use VCFtools to calculate nucleotide diversity
 zcat input_file.vcf.gz | vcftools --vcf - --site-pi --positions SNP_list.txt --out nucleotide_diversity
