@@ -1,5 +1,8 @@
 ### SNP CALLING PIPELINE USING SAMTOOLS TO CALCULATE NUCLEOTIDE DIVERSITY
-### Created June 16, 2020 
+### Adapted from Dan Bolser " A Simple SNP Calling Pipeline" dbolser@ebi.ac.uk
+
+## Version of Samtools: v1.10
+## Version of VCFtools: v0.1.16
 
 # trim the FASTQ reads for quality and length
 ## URS4
@@ -33,8 +36,25 @@ samtools mpileup -g -f my.fasta my-sorted1.bam my-sorted-2.bam my-sorted-n.bam >
 # Call SNPs
 bcftools view -bvcg my-raw.bcf > my-var.bcf
 
+# Remove Duplicates with bcftools
+bcftools norm --remove-duplicates input.bcf > fil.output.bcf
+
 # Filter SNPs
 bcftools view my.var.bcf | vcfutils.pl varFilter - > my.var-final.vcf
+
+# Remove Duplicates with bcftools
+bcftools norm --remove-duplicates input.bcf > fil.output.bcf
+
+## Include only biallelic sites, sites with a MAF > or equal to 0.05, and sites with mean depth coverage with a max of X and a min of Y 
+vcftools \
+--vcf file1.vcf \
+--min-alleles 2 \
+--max-alleles 2 \
+--maf 0.05 \
+--min-meanDP <float> \
+--max-meanDP <float>
+
+
 
 # Use VCFtools to calculate nucleotide diversity
 zcat input_file.vcf.gz | vcftools --vcf - --site-pi --positions SNP_list.txt --out nucleotide_diversity
